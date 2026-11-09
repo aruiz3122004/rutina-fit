@@ -1,0 +1,90 @@
+Sistema de gestión Rutina Fit
+
+Stack:
+React / Electron / SQLite (Better-Sqlite3) / WhatsApp API
+
+Dicho sistema almacena las sesiones de los usuarios que van al gimnasio.
+
+¿Donde está implementado?
+-El programa se ejecuta de manera local, abriendo la aplicación en react Electron desde un dispositivo.
+
+¿Quienes la manejan?
+-Lo maneja la persona que está en la recepción, con acceso al computador
+
+¿Cuantos roles hay?
+-Solo existe un rol, el de administrador
+
+¿Donde viven los datos?
+-Se almacenan en la base de datos local de SQLite, programados para descargar un Backup o copia mensual que se descargaba en la carpeta /backups, la cual había que pasar el archivo a una memoria USB y a una carpeta en Google Drive para mantener los datos tanto en la nube como en un hardware independiente.
+
+¿Que necesidad solucionaba?
+-La dependencia total de guardar los datos en agendas, por tanto, se llevó a un sistema donde se podía replicar dicha información.
+
+¿Como le llegaban los datos al dueño?
+-Se utilizaba la API de WhatsApp para conectar el número del administrador, ya que este diariamente solicitaba la siguiente información: 
+
+-¿Cuantas sesiones hubo hoy?
+-¿Cuántas mensualidades se pagaron hoy?
+-¿Cual fue el recaudo hoy? (Separado por sesiones e inventario)
+Ej:
+Sesiones: $500,000
+Energy: $12,000
+Agua: $18,000
+Mensualidades: $120,000
+Efectivo: $350,000
+Nequi: $150,000
+
+Estos le llegaban simplificados a su WhatsApp, que tomaba esos datos JSON y los convertía a mensajes, devolviéndolo al formato de texto convencional.
+
+Había un botón de "Enviar datos", con un icono de WhatsApp, que automáticamente le mandaban la información al dueño en formato de Texto.
+
+¿Que tablas había en la base de datos? 
+
+-Tablas que recopilaban:
+
+-> Sesiones.sqlite:
+Almacenaba campos: 
+-Sesion (Usuario que pagaba por si rutina)
+-Medio de pago (Efectivo / Transferencia / Híbrido)
+-Efectivo (Almacenaba pagos en efectivo)
+-Transferencia (almacenaba pagos por nequi, Daviplata y Bancolombia)
+-Timestamp (Fecha y Hora de entrada)
+
+
+ la cantidad de sesiones (tomaban el timestamp (hora/fecha) / Nombre por defecto "Sesión N+1" con nombre editable en formato INPUT que se actualizaba también en la base de datos, no solo en la interfaz de usuario), una para el precio pagado (por defecto 4000, que era el precio de la sesión, pero que podía editarse, ya que cada año subía el precio base o se daba el caso de que un usuario pagaba una mitad por nequi y otra en efectivo.
+
+Medio de pago, por defecto efectivo, editable por lista (Nequi, Daviplata o Bancolombia) 
+
+-Métricas.sqlite:
+ Descargaba las métricas  (número de sesiones, mensualidades, etc. Generadas en la aplicación en su módulo correspondiente)
+
+Se podía filtrar por semana, mes y año:
+
+Sesiones - Mensualidades - 
+Agua - 
+Energy - 
+Creatina - 
+Proteína - 
+Aminoácidos - 
+
+-Mensualidades.sqlite:
+Descargaba los datos de usuario 
+
+Nombre - 
+Duración (por defecto 30 días) -
+Precio (por defecto $60,000) se cambiaba si era personalizada ($200,000 / $250,000)
+Timestamp - 
+
+
+
+
+
+¿Como se guardaba en el sistema cuando las personas pagaban de forma híbrida (Nequi / Efectivo)?
+
+Se guardaba en la fila de "Medio de pago" como "Híbrido" y se colocaba en Cada campo correspondiente el precio pagado (es decir, si pagaba 2500 en efectivo y 1500 por nequi se digitaba esta información manualmente)
+
+
+Había un botón de exportar datos, que descargaba el archivo SQLite, y otro botón que era para enviar datos del día por WhatsApp al número del dueño. (El usuario debía seleccionar todos los datos (un botón para eso, en forma de check) y elegir si los mandaba por WhatsApp o los descargaba) -> Usaba selector por columnas, es decir, las columnas seleccionaban eran las que se podían eliminar, descargar o exportar.
+
+
+-La descarga era de manera asíncrona, es decir, no afectaba en nada el funcionamiento de la aplicación.
